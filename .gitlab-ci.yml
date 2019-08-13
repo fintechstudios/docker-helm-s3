@@ -1,0 +1,47 @@
+variables:
+  DOCKER_HUB_REPO: index.docker.io/fintechstudios/helm-s3
+  DOCKER_TLS_CERTDIR: ""  # https://gitlab.com/gitlab-org/gitlab-runner/issues/4501
+  DOCKER_DRIVER: overlay2
+
+stages:
+  - release
+
+.build-and-release: &build-and-release
+  stage: release
+  image: docker:stable
+  only:
+    - /^master$/
+  except:
+    refs:
+      - tags
+  services:
+    - docker:dind
+  variables:
+    HELM_VERSION: latest
+    HELM_S3_VERSION: latest
+    RELEASE_TAG: latest
+  script:
+    - "docker build \
+              --build-arg HELM_VERSION \
+              --build-arg HELM_S3_VERSION \
+              --tag $DOCKER_HUB_REPO:$RELEASE_TAG \
+              ."
+    # log in and push to the docker hub
+    - echo "$DOCKER_HUB_PASS" | docker login --username "$DOCKER_HUB_USERNAME" --password-stdin docker.io
+    - docker push $DOCKER_HUB_REPO:$RELEASE_TAG
+
+# No build matrix yet supported on Gitlab
+docker-release-helm-2.14.3_plugin-0.8.0:
+  <<: *build-and-release
+  variables:
+    HELM_VERSION: 2.14.3
+    HELM_S3_VERSION: 0.8.0
+    RELEASE_TAG: 2.14.3_0.8.0
+
+# Release the latest versions of both
+docker-release-latest:
+  <<: *build-and-release
+  variables:
+    HELM_VERSION: latest
+    HELM_S3_VERSION: 0.8.0
+    RELEASE_TAG: latest
