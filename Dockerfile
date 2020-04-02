@@ -9,4 +9,7 @@ RUN apk add --update \
   && curl -LO https://storage.googleapis.com/kubernetes-release/release/"$KUBECTL_VERSION"/bin/linux/amd64/kubectl \
   && chmod +x ./kubectl \
   && mv ./kubectl /usr/local/bin/kubectl \
+  # add bash
+  && apk add bash \
+  # remove other deps
   && apk del .build-deps && rm -f /var/cache/apk/*
