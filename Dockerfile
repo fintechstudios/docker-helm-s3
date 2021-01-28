@@ -1,9 +1,11 @@
-FROM hypnoglow/helm-s3:0.9.2-helm2.16
+ARG HELM_S3_PLUGIN_VERSION="0.10.0-helm2.16.9"
+FROM hypnoglow/helm-s3:${HELM_S3_PLUGIN_VERSION}
 
-ENV BASE_URL=https://get.helm.sh
-ENV TAR_FILE=helm-v2.16.3-linux-amd64.tar.gz
-
+ARG HELM_VERSION="v2.16.9"
 ARG KUBECTL_VERSION="v1.18.0"
+
+ENV HELM_TAR_URL=https://get.helm.sh/helm-${HELM_VERSION}-linux-amd64.tar.gz
+
 RUN apk add --update \
     --no-cache \
     curl \
@@ -14,7 +16,7 @@ RUN apk add --update \
   # add bash and other deps
   && apk --no-cache add bash \
   # get tiller, as the root alpine/helm image doesn't expose it
-  && curl -L ${BASE_URL}/${TAR_FILE} | tar xvz \
+  && curl -L ${HELM_TAR_URL} | tar xvz \
   && mv linux-amd64/tiller /usr/bin/tiller \
   && chmod +x /usr/bin/tiller \
   && rm -rf linux-amd64 \
